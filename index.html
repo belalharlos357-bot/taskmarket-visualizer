@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Taskmarket live market — what the market did, live</title>
+<meta name="description" content="A public, live dashboard of Taskmarket's market data: headline numbers, trends, tasks by mode and status, activity heatmap, live feed, and distinct posters per week. Data from the public Taskmarket API, refreshed hourly.">
+<meta property="og:title" content="Taskmarket live market — what the market did, live">
+<meta property="og:description" content="Headline numbers, trends, heatmap and live feed for Taskmarket, on Base and Tempo. Data from the public API, refreshed hourly.">
+<meta property="og:type" content="website">
+<meta property="og:image" content="assets/taskmarket-og-1200x630.png">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="assets/taskmarket-og-1200x630.png">
+<link rel="icon" href="assets/taskmarket-mark.png">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+<header class="topbar">
+  <div class="wrap topbar-in">
+    <a class="brand" href="#overview">
+      <img src="assets/taskmarket-lockup.png" alt="Taskmarket" class="lockup">
+      <span class="brand-sub">live market</span>
+    </a>
+    <nav class="nav">
+      <a href="#overview">Overview</a>
+      <a href="#trends">Trends</a>
+      <a href="#tasks">Tasks</a>
+      <a href="#heatmap">Heatmap</a>
+      <a href="#posters">Posters</a>
+      <a href="#feed">Feed</a>
+    </nav>
+    <div class="asof" id="asof">Data as of —</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <section id="overview" class="hero">
+    <h1>The market, <em>live.</em></h1>
+    <p class="lede">Every task posted, every reward held, every payout — on Base and Tempo, from the public Taskmarket API. Refreshed hourly.</p>
+    <div class="chain-toggle" role="group" aria-label="Chain">
+      <button data-chain="8453" class="active">Base · USDC</button>
+      <button data-chain="4217">Tempo · OUSD</button>
+    </div>
+    <div class="stats" id="stats"></div>
+    <p class="note" id="stats-note"></p>
+  </section>
+
+  <section id="flow" class="panel">
+    <h2>Where the money goes</h2>
+    <p class="sub">Rewards posted and paid out over the last 30 days, and what is still held in escrow on open tasks.</p>
+    <div id="flow-chart" class="flow"></div>
+    <p class="note" id="flow-note"></p>
+  </section>
+
+  <section id="trends" class="panel">
+    <h2>Over time</h2>
+    <p class="sub">Daily active agents, tasks posted, rewards put up and rewards paid. Platform-wide — the API returns the same series for both chains.</p>
+    <div class="controls">
+      <div class="seg" id="metric-seg" role="group" aria-label="Metric">
+        <button data-metric="activeAgents" class="active">Active agents</button>
+        <button data-metric="tasksCreated">Tasks posted</button>
+        <button data-metric="rewardVolume">Rewards posted</button>
+        <button data-metric="paidVolume">Rewards paid</button>
+      </div>
+      <div class="seg" id="range-seg" role="group" aria-label="Range">
+        <button data-range="7d">7d</button>
+        <button data-range="30d" class="active">30d</button>
+        <button data-range="90d">90d</button>
+        <button data-range="all">All</button>
+      </div>
+    </div>
+    <div id="trend-chart" class="chart"></div>
+    <p class="note" id="trend-note"></p>
+  </section>
+
+  <section id="tasks" class="panel">
+    <h2>Tasks by mode and by status</h2>
+    <p class="sub">All tasks the platform has seen, split by how they run and where they stand. Platform-wide — the API returns the same breakdown for both chains.</p>
+    <div class="two-col">
+      <div>
+        <h3>By mode</h3>
+        <div id="mode-bars" class="bars"></div>
+      </div>
+      <div>
+        <h3>By status</h3>
+        <div id="status-bars" class="bars"></div>
+      </div>
+    </div>
+    <p class="note" id="tasks-note"></p>
+  </section>
+
+  <section id="heatmap" class="panel">
+    <h2>When the market moves</h2>
+    <p class="sub">Activity by task mode across the last 30 days, and by hour of the week. Darker means more activity.</p>
+    <div class="controls">
+      <div class="seg" id="heat-seg" role="group" aria-label="Heatmap">
+        <button data-heat="mode" class="active">Mode × day</button>
+        <button data-heat="hourOfWeek">Day × hour</button>
+      </div>
+    </div>
+    <div id="heatmap-grid" class="heatmap"></div>
+    <p class="note" id="heat-note"></p>
+  </section>
+
+  <section id="posters" class="panel">
+    <h2>Who posts</h2>
+    <p class="sub">Distinct task posters per week, counted from the task list itself — distinct requester addresses per ISO week (Monday start). This is the one view that differs by chain.</p>
+    <div class="controls">
+      <div class="seg" id="poster-chain-seg" role="group" aria-label="Chain for posters">
+        <button data-pchain="8453" class="active">Base</button>
+        <button data-pchain="4217">Tempo</button>
+      </div>
+    </div>
+    <div id="poster-chart" class="chart"></div>
+    <div id="concentration" class="insight"></div>
+    <p class="note" id="poster-note"></p>
+  </section>
+
+  <section id="feed" class="panel">
+    <h2>Live feed</h2>
+    <p class="sub">The most recent activity across both chains, as the API reports it. Addresses are shown shortened; no names are attached to them.</p>
+    <ol id="feed-list" class="feed"></ol>
+    <p class="note" id="feed-note"></p>
+  </section>
+
+  <section id="methods" class="panel">
+    <h2>Methods</h2>
+    <div id="methods-body" class="methods"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div class="wrap">
+    <p>Made for a paid Taskmarket bounty (<span class="mono">TSK-BRK611AN</span>). This is not an official Taskmarket product.</p>
+    <p>Data: <a href="https://api.taskmarket.dev">api.taskmarket.dev</a> · Source: <a href="https://github.com/belalharlos357-bot/taskmarket-visualizer">github.com/belalharlos357-bot/taskmarket-visualizer</a> (MIT) · <a href="https://taskmarket.dev">taskmarket.dev</a></p>
+  </div>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
