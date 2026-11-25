@@ -1,0 +1,46 @@
+# Refresh market data hourly.
+#
+# Fetches the public Taskmarket API server-side (the API blocks browser
+# requests from other sites), writes data/market.json, and commits it
+# when it changed. The static site on GitHub Pages reads that file, so
+# the dashboard stays live and hourly-fresh with no backend.
+#
+# If the fetch fails, the job fails and the last good data file stays
+# in place — the site never serves a partial file.
+
+name: Refresh market data
+
+on:
+  schedule:
+    - cron: "0 * * * *" # every hour, on the hour
+  workflow_dispatch: # allow a manual run
+
+permissions:
+  contents: write
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
+      - name: Fetch Taskmarket API
+        run: node scripts/fetch-data.mjs
+
+      - name: Commit data if it changed
+        run: |
+          git config user.name "taskmarket-visualizer-bot"
+          git config user.email "visualizer-bot@users.noreply.github.com"
+          git add data/market.json
+          if git diff --cached --quiet; then
+            echo "No change in market data."
+          else
+            git commit -m "chore: refresh market data $(date -u +%Y-%m-%dT%H:%M:%SZ)"
+            git push
+          fi
