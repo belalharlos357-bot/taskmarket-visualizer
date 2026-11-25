@@ -1,0 +1,1 @@
+{"description":"Public live dashboard of Taskmarket market data (Base and Tempo), refreshed hourly from the public API.","engines":{"node":">=22"},"license":"MIT","name":"taskmarket-visualizer","scripts":{"deploy":"sh scripts/deploy.sh","fetch":"node scripts/fetch-data.mjs","preview":"python3 -m http.server 8000"},"type":"module","version":"1.0.0"}

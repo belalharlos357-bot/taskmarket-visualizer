@@ -1,0 +1,58 @@
+Taskmarket live market visualizer — bounty notes (TSK-BRK611AN)
+=============================================================
+
+Live URL: https://belalharlos357-bot.github.io/taskmarket-visualizer/
+Repo URL: https://github.com/belalharlos357-bot/taskmarket-visualizer
+
+Stack
+-----
+Static site, no backend, no build step, no dependencies:
+- index.html + styles.css + app.js (vanilla JS, inline SVG charts)
+- data/market.json — cached API snapshot, refreshed by the Action
+- Brand fonts and images self-hosted in assets/ (no third-party requests)
+- Node 24 script (scripts/fetch-data.mjs) for the server-side fetch
+
+Endpoints used (base https://api.taskmarket.dev, public, no key)
+-----------------------------------------------------------------
+- GET /api/market/stats?chainId=8453 and ?chainId=4217 — headline numbers
+- GET /api/stats/breakdowns?chainId=8453 — tasks by status, mode, actor type
+- GET /api/stats/platform-time-series?chainId=8453&range=7d|30d|90d|all&bucket=day
+- GET /api/stats/activity-heatmap?chainId=8453&range=30d&dimension=mode|hourOfWeek
+- GET /api/stats/activity-feed?chainId=8453&limit=50
+- GET /api/tasks?chainId=8453|4217&sort=newest&limit=100 — paginated by cursor
+
+How and how often it refreshes
+-------------------------------
+A GitHub Action (.github/workflows/refresh-data.yml) runs every hour on the
+hour: `node scripts/fetch-data.mjs` fetches the API server-side, computes the
+derived views (distinct posters per week, concentration, money flow), writes
+data/market.json with a fetchedAt timestamp, and commits it when it changed.
+The page reads data/market.json and shows "Data as of <time>" at the top.
+The API blocks browser requests from other sites, so nothing is fetched
+from the browser. Cache: the JSON is served with the Pages default cache;
+the data file itself is regenerated at most once an hour.
+
+Deploy command
+--------------
+  sh scripts/deploy.sh
+(or: npm run deploy — same script). It fetches fresh data once, enables
+GitHub Pages from the main branch, and prints the live URL.
+
+What is per-chain and what is not
+----------------------------------
+Verified against the live API: the breakdowns, the time series, the heatmap
+and the feed are platform-wide (identical payloads for both chain IDs).
+Only the headline paid-workers / active-wallets and the task lists differ
+by chain. The dashboard states this in its methods note.
+
+Distinct posters per week: distinct requester addresses among tasks with
+createdAt in that ISO week (Monday start), from the per-chain task list
+paginated newest-first over the last 12 weeks. Money: USDC and OUSD are
+both 6 decimals; volumes divided by 1,000,000.
+
+Rules followed
+--------------
+Read-only; no wallet connection; no analytics or tracking; addresses shown
+shortened with no names attached; every number reproducible from the API;
+footer states it was made for a paid Taskmarket bounty and is not an
+official Taskmarket product; no third-party logos; no invented numbers.
